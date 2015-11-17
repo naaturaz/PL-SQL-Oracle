@@ -1,0 +1,68 @@
+SQL> --CALLER
+SQL> DECLARE
+  LISTTEMP ITEM_LIST_T := ITEM_LIST_T();
+BEGIN
+  DBMS_OUTPUT.PUT_LINE('Username is: ' || USER );
+  DBMS_OUTPUT.PUT_LINE('Today''s DATE IS ' || SYSDATE );
+  DBMS_OUTPUT.PUT_LINE('');
+  
+  LISTTEMP := ITEM_LIST_T();
+  BOM.MLBOM(10, NULL, NULL, 0, LISTTEMP);
+  DISPLAY(LISTTEMP);
+  
+  BOM.MLBOM(11, NULL, NULL, 0, LISTTEMP);
+  DISPLAY(LISTTEMP);
+  
+  BOM.MLBOM(21, NULL, NULL, 0, LISTTEMP);
+  DISPLAY(LISTTEMP);
+  
+  BOM.MLBOM(43, NULL, NULL, 0, LISTTEMP);
+END;
+/
+
+PL/SQL procedure successfully completed.
+
+Username is: MLOPEZCASTELL
+Today's DATE IS 17-NOV-15
+
+Assemblies for Item_Id: 10 (CCM 18-speed mens bicycle)
+Id: 17  Quantity: 1  Description: CCM padded seat assembly - men
+Id: 20  Quantity: 1  Description: CCM 26-inch front wheel assembly
+Id: 21  Quantity: 1  Description: CCM 26-inch rear wheel assembly
+Id: 26  Quantity: 1  Description: CCM 18-inch mens frame
+Id: 27  Quantity: 1  Description: Shimano 18-speed rear derailleur
+Id: 28  Quantity: 1  Description: Shimano 18-speed front derailleur
+Id: 29  Quantity: 2  Description: CCM racing pedal
+Id: 42  Quantity: 1  Description: CCM handlebar assembly
+Id: 18  Quantity: 1  Description: CCM padded seat post
+Id: 19  Quantity: 1  Description: CCM padded seat cover
+Id: 25  Quantity: 2  Description: CCM 26-inch road racing tube
+Id: 22  Quantity: 1  Description: CCM 26-inch rear wheel rim assembly
+Id: 24  Quantity: 1  Description: CCM 26-inch road racing tire
+Id: 23  Quantity: 1  Description: CCM 26-inch rear wheel hub
+
+Assemblies for Item_Id: 11 (Specialized Hardrock unisex 12-speed bicycle)
+Id: 16  Quantity: 1  Description: Specialized padded seat - unisex
+Id: 27  Quantity: 1  Description: Shimano 18-speed rear derailleur
+Id: 28  Quantity: 1  Description: Shimano 18-speed front derailleur
+Id: 30  Quantity: 1  Description: Specialized 26-inch front wheel assembly
+Id: 31  Quantity: 1  Description: Specialized 26-inch rear wheel assembly
+Id: 36  Quantity: 1  Description: Specialized Hardrock 21-inch mens frame
+Id: 37  Quantity: 2  Description: Specialized racing pedal assembly
+Id: 41  Quantity: 1  Description: Specialized handlebar assembly
+Id: 34  Quantity: 2  Description: Specialized 26-inch road racing tire
+Id: 35  Quantity: 2  Description: Specialized 26-inch road racing tire tube
+Id: 32  Quantity: 1  Description: Specialized 26-inch rear wheel rim assembly
+Id: 38  Quantity: 1  Description: Specialized pedal crank
+Id: 39  Quantity: 1  Description: Specialized racing pedal
+Id: 40  Quantity: 1  Description: Cotter pin
+Id: 33  Quantity: 1  Description: Specialized 26-inch rear wheel hub
+
+Assemblies for Item_Id: 21 (CCM 26-inch rear wheel assembly)
+Id: 22  Quantity: 1  Description: CCM 26-inch rear wheel rim assembly
+Id: 24  Quantity: 1  Description: CCM 26-inch road racing tire
+Id: 25  Quantity: 1  Description: CCM 26-inch road racing tube
+Id: 23  Quantity: 1  Description: CCM 26-inch rear wheel hub
+
+Item_Id: 43 (Mercx 21-inch frame), has not assemblies
+
