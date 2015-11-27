@@ -1,8 +1,7 @@
 --A4
 --MANUEL LOPEZ
 
-SELECT * 
-FROM faculty f LEFT OUTER JOIN student s ON(f.f_id = s.f_id);
+
 
 INSERT INTO FACULTY VALUES(7, 'Cuco2', 'Azul2', 'A', 9, 4014014011, 'Full', 1,
   6060, NULL);
@@ -14,12 +13,17 @@ INSERT INTO student VALUES
 INSERT INTO student VALUES
 ('KO104', 'Cuco Stu2', 'Tammy3', 'R', '1817 Eagleridge Circle', 'Tallahassee', 
 'FL', '32811', '7155559876', 'SR', TO_DATE('07/14/1985', 'MM/DD/YYYY'), 8891, 6, TO_YMINTERVAL('3-2')); 
-  
+
+UPDATE FACULTY SET F_ID = 10 where f_id = 1;
+UPDATE STUDENT SET F_ID = 4 where S_id = 'SM100';
 
 SELECT * FROM FACULTY;
 SELECT * FROM STUDENT;
 
-SELECT * FROM MLMV;
+SELECT * 
+FROM faculty f LEFT OUTER JOIN student s ON(f.f_id = s.f_id) ORDER BY f.F_LAST;
+
+SELECT * FROM MLMV ORDER BY F_LAST;
 --ASK ABT THE TABLE CREATION 
 DROP TABLE MLMV;
 
@@ -34,7 +38,6 @@ FROM FACULTY F LEFT OUTER JOIN STUDENT S ON(F.F_ID = S.F_ID));
 CREATE OR REPLACE TRIGGER INSERT_AFTER_FACULTY
 AFTER INSERT ON FACULTY
 FOR EACH ROW
---declare
 BEGIN
     INSERT INTO MLMV
     VALUES(:NEW.F_ID, :NEW.F_LAST, :NEW.F_FIRST, :NEW.F_MI, :NEW.LOC_ID,
@@ -48,8 +51,32 @@ EXCEPTION
   WHEN OTHERS THEN
     DBMS_OUTPUT.PUT_LINE('Unknown error ocurred. INSERT_AFTER_FACULTY');
 END;
---UPDATE
 
+--UPDATE
+CREATE OR REPLACE TRIGGER UPDATE_AFTER_FACULTY
+AFTER UPDATE ON FACULTY
+FOR EACH ROW
+BEGIN
+
+    UPDATE MLMV
+      SET F_ID = :NEW.F_ID,
+          F_LAST = :NEW.F_LAST,
+          F_FIRST = :NEW.F_FIRST,
+          F_MI = :NEW.F_MI,
+          LOC_ID = :NEW.LOC_ID,
+          F_PHONE = :NEW.F_PHONE,
+          F_RANK = :NEW.F_RANK,
+          F_SUPER = :NEW.F_SUPER,
+          F_PIN = :NEW.F_PIN
+          
+      WHERE F_ID = :OLD.F_ID;
+    
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    DBMS_OUTPUT.PUT_LINE('No data found. INSERT_AFTER_FACULTY');
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('Unknown error ocurred. INSERT_AFTER_FACULTY');
+END;
 
 --DELETE
 
@@ -109,7 +136,103 @@ EXCEPTION
   WHEN OTHERS THEN
     DBMS_OUTPUT.PUT_LINE('Unknown error ocurred. INSERT_AFTER_STUDENT');
 END;
---UPDATE
 
+--UPDATE
+CREATE OR REPLACE TRIGGER UPDATE_AFTER_STUDENT
+AFTER UPDATE ON STUDENT
+FOR EACH ROW
+DECLARE
+    CURSOR CUR(FACULTY_ID IN INTEGER) IS
+      SELECT * FROM FACULTY WHERE F_ID = FACULTY_ID;
+    CUR_ROW CUR%ROWTYPE;
+    
+    CURSOR CUR_STU(FACULTY_ID IN INTEGER) IS
+      SELECT * FROM STUDENT WHERE F_ID = FACULTY_ID;
+    CUR_STU_ROW CUR_STU%ROWTYPE;
+
+BEGIN
+
+    UPDATE MLMV
+      SET S_ID = :NEW.S_ID,
+          S_LAST = :NEW.S_LAST,
+          S_FIRST = :NEW.S_FIRST,
+          S_MI = :NEW.S_MI,
+          S_ADDRESS = :NEW.S_ADDRESS,
+          S_CITY = :NEW.S_CITY,
+          S_STATE = :NEW.S_STATE,
+          S_ZIP = :NEW.S_ZIP,
+          S_PHONE = :NEW.S_PHONE,
+          S_CLASS = :NEW.S_CLASS,
+          S_DOB = :NEW.S_DOB,
+          S_PIN = :NEW.S_PIN,
+          TIME_ENROLLED = :NEW.TIME_ENROLLED
+      WHERE S_ID = :OLD.S_ID;
+      
+      
+      
+      
+      IF :OLD.F_ID != :NEW.F_ID THEN
+      
+        OPEN CUR(:NEW.F_ID);
+          FETCH CUR INTO CUR_ROW;
+          --MEANS FOUND A MATCH IN FACULTY 
+          IF CUR%FOUND THEN
+
+            UPDATE MLMV
+              SET F_ID = CUR_ROW.F_ID,
+                  F_LAST = CUR_ROW.F_LAST,
+                  F_FIRST = CUR_ROW.F_FIRST,
+                  F_MI = CUR_ROW.F_MI,
+                  LOC_ID = CUR_ROW.LOC_ID,
+                  F_PHONE = CUR_ROW.F_PHONE,
+                  F_RANK = CUR_ROW.F_RANK,
+                  F_SUPER = CUR_ROW.F_SUPER,
+                  F_PIN = CUR_ROW.F_PIN
+                  
+              WHERE S_ID = :OLD.S_ID AND F_ID = :OLD.F_ID;
+          
+          --STUDENT DONT HAVE TUTOR ASSIGNED OR WAS NOT FOUND
+          ELSIF CUR%NOTFOUND THEN
+                DELETE FROM MLMV WHERE S_ID = :OLD.S_ID;
+          END IF;
+          
+          --CHECK IF OLD PROF HAS AT LEAST ONE STUDENT IF NOT THEN A NEW
+          --ROW SHOULD BE INSERTED , 
+          --WITH NULL VALUES ON THE SUTDENT RELATED COLUMNS
+          DBMS_OUTPUT.PUT_LINE(TO_CHAR(:OLD.F_ID) || ' old f_id');
+          OPEN CUR_STU(:OLD.F_ID);
+            FETCH CUR_STU INTO CUR_STU_ROW;
+          
+            IF CUR_STU%NOTFOUND THEN
+            
+                  --OPEN CUR(:OLD.F_ID);
+                  --FETCH CUR INTO CUR_ROW;
+              
+                  INSERT INTO MLMV
+                    VALUES(CUR_ROW.F_ID, CUR_ROW.F_LAST, CUR_ROW.F_FIRST, CUR_ROW.F_MI, CUR_ROW.LOC_ID,
+                      CUR_ROW.F_PHONE, CUR_ROW.F_RANK, CUR_ROW.F_SUPER, CUR_ROW.F_PIN,
+                      NULL, NULL, NULL, NULL, NULL,
+                      NULL, NULL, NULL, NULL, NULL,
+                      NULL, NULL, NULL);
+              
+            END IF;
+          
+          CLOSE CUR_STU; 
+        CLOSE CUR;
+        
+        --NEED TO ADDRESS IF FOUND A NEW FACULTY THAT HAD NONE STUDENTS TO TUTOR
+        --BEFORE, HENCE MUST INSERT A NEW FIELD ON THE MATERIALIZED VIEW 
+          
+      END IF;
+    
+    
+    
+    
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    DBMS_OUTPUT.PUT_LINE('No data found. UPDATE_AFTER_STUDENT');
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('Unknown error ocurred. UPDATE_AFTER_STUDENT');
+END;
 
 --DELETE
