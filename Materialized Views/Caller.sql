@@ -1,13 +1,17 @@
 --A4
 --MANUEL LOPEZ
 
-
+--CALLER
 
 SET SERVEROUTPUT ON SIZE 10000;
 SET LINESIZE 5000;
-SPOOL C:/TEMP/ML3.out REPLACE;
---CALLER
+SPOOL C:/TEMP/ML4.out REPLACE;
+
 BEGIN
+  DBMS_OUTPUT.PUT_LINE('Username is: ' || USER );
+  DBMS_OUTPUT.PUT_LINE('Today''s DATE IS ' || SYSDATE );
+  DBMS_OUTPUT.PUT_LINE(' ');
+  
   --1
   DBMS_OUTPUT.PUT_LINE('1.	the addition of a new student for a faculty member that does not currently have any students');
   PRINT_SCREEN();
